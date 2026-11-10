@@ -1,0 +1,2 @@
+# ok() selalu sukses (pola A && ok || fail aman); .env dibaca saat runtime
+disable=SC1091,SC2012,SC2015

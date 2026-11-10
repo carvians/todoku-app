@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TodoKu - Manajemen Tugas</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><path d='M9 16.5l4.5 4.5L23 11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- ================= HALAMAN LOGIN / REGISTER ================= -->
+  <section id="auth-view" class="auth hidden">
+    <div class="auth-card">
+      <div class="brand big"><span class="logo">✓</span> TodoKu</div>
+      <p class="muted">Kelola tugas kuliah, pekerjaan, dan pribadi di satu tempat.</p>
+      <div class="tabs">
+        <button class="tab active" data-auth-tab="login">Masuk</button>
+        <button class="tab" data-auth-tab="register">Daftar</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field register-only hidden">Nama lengkap
+          <input name="name" autocomplete="name" placeholder="Nama kamu" />
+          <small class="err" data-err="name"></small>
+        </label>
+        <label class="field">Email
+          <input name="email" type="email" autocomplete="email" placeholder="nama@email.com" />
+          <small class="err" data-err="email"></small>
+        </label>
+        <label class="field">Password
+          <input name="password" type="password" autocomplete="current-password" placeholder="Minimal 8 karakter, huruf & angka" />
+          <small class="err" data-err="password"></small>
+        </label>
+        <div class="form-error" id="auth-error"></div>
+        <button class="btn primary block" type="submit" id="auth-submit">Masuk</button>
+      </form>
+      <p class="ver-line">Versi <span class="app-version">-</span></p>
+    </div>
+  </section>
+
+  <!-- ================= APLIKASI UTAMA ================= -->
+  <div id="main-view" class="layout hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="logo">✓</span> TodoKu</div>
+      <nav>
+        <a href="#/tasks" class="nav-link" data-route="tasks">📋 Tugas</a>
+        <a href="#/dashboard" class="nav-link" data-route="dashboard">📊 Dashboard</a>
+      </nav>
+      <div class="side-section">
+        <div class="side-title">Kategori <button class="icon-btn" id="add-category" title="Tambah kategori">＋</button></div>
+        <ul id="category-list" class="cat-list"></ul>
+      </div>
+      <div class="side-footer">
+        <div class="user-box">
+          <div class="avatar" id="user-avatar">?</div>
+          <div><div id="user-name" class="strong">-</div><div id="user-email" class="muted small">-</div></div>
+        </div>
+        <button class="btn ghost block" id="logout">Keluar</button>
+        <div class="muted small center">v<span class="app-version">-</span></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- ---------- Halaman Tugas ---------- -->
+      <section id="tasks-page" class="page hidden">
+        <header class="page-head">
+          <div>
+            <h1 id="tasks-title">Semua Tugas</h1>
+            <p class="muted" id="tasks-subtitle">-</p>
+          </div>
+          <button class="btn primary" id="new-task">＋ Tugas baru</button>
+        </header>
+
+        <form id="quick-add" class="quick-add">
+          <input id="quick-title" placeholder="Tambah cepat: ketik judul tugas lalu Enter..." maxlength="200" autocomplete="off" />
+          <select id="quick-priority" title="Prioritas">
+            <option value="medium">Sedang</option><option value="high">Tinggi</option><option value="low">Rendah</option>
+          </select>
+          <input id="quick-due" type="date" title="Deadline" />
+          <button class="btn primary">Tambah</button>
+        </form>
+
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="🔍 Cari judul / deskripsi..." />
+          <select id="f-status">
+            <option value="">Semua status</option><option value="todo">Belum mulai</option>
+            <option value="in_progress">Dikerjakan</option><option value="done">Selesai</option>
+          </select>
+          <select id="f-priority">
+            <option value="">Semua prioritas</option><option value="high">Tinggi</option>
+            <option value="medium">Sedang</option><option value="low">Rendah</option>
+          </select>
+          <select id="f-due">
+            <option value="">Semua deadline</option><option value="overdue">Terlambat</option>
+            <option value="today">Hari ini</option><option value="week">7 hari ke depan</option><option value="none">Tanpa deadline</option>
+          </select>
+          <select id="f-sort">
+            <option value="created_at:desc">Terbaru</option><option value="created_at:asc">Terlama</option>
+            <option value="due_date:asc">Deadline terdekat</option><option value="priority:desc">Prioritas tertinggi</option>
+            <option value="title:asc">Judul A-Z</option>
+          </select>
+        </div>
+
+        <ul id="task-list" class="task-list"></ul>
+        <div id="pager" class="pager"></div>
+      </section>
+
+      <!-- ---------- Halaman Dashboard ---------- -->
+      <section id="dashboard-page" class="page hidden">
+        <header class="page-head">
+          <div><h1>Dashboard</h1><p class="muted">Ringkasan progres tugasmu</p></div>
+        </header>
+        <div class="cards" id="stat-cards"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Aktivitas 14 hari terakhir</h3><div id="chart-daily" class="chart"></div>
+            <div class="legend"><span><i style="background:#c7d2fe"></i>Dibuat</span><span><i style="background:#4f46e5"></i>Diselesaikan</span></div></div>
+          <div class="panel"><h3>Status tugas</h3><div id="chart-status" class="donut-wrap"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3>Per prioritas</h3><div id="chart-priority"></div></div>
+          <div class="panel"><h3>Per kategori</h3><div id="chart-category"></div></div>
+        </div>
+        <div class="panel"><h3>Deadline 7 hari ke depan & terlambat</h3><ul id="upcoming" class="upcoming"></ul></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= MODAL DETAIL TUGAS ================= -->
+  <div id="task-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <header class="modal-head">
+        <h2 id="modal-title">Tugas baru</h2>
+        <button class="icon-btn" data-close>✕</button>
+      </header>
+      <form id="task-form" novalidate>
+        <label class="field">Judul
+          <input name="title" maxlength="200" required />
+          <small class="err" data-err="title"></small>
+        </label>
+        <label class="field">Deskripsi
+          <textarea name="description" rows="4" maxlength="5000" placeholder="Catatan, langkah-langkah, tautan..."></textarea>
+        </label>
+        <div class="row-3">
+          <label class="field">Status
+            <select name="status"><option value="todo">Belum mulai</option><option value="in_progress">Dikerjakan</option><option value="done">Selesai</option></select>
+          </label>
+          <label class="field">Prioritas
+            <select name="priority"><option value="low">Rendah</option><option value="medium" selected>Sedang</option><option value="high">Tinggi</option></select>
+          </label>
+          <label class="field">Deadline
+            <input name="due_date" type="date" />
+            <small class="err" data-err="due_date"></small>
+          </label>
+        </div>
+        <label class="field">Kategori
+          <select name="category_id" id="task-category"></select>
+        </label>
+
+        <div id="attachment-section" class="attachments hidden">
+          <div class="att-head">
+            <strong>Lampiran</strong>
+            <label class="btn ghost small">📎 Unggah file<input type="file" id="file-input" hidden /></label>
+          </div>
+          <p class="muted small">PDF, gambar, dokumen Office, TXT/CSV, ZIP. Maks. 5 MB per file, 10 file per tugas.</p>
+          <div id="upload-progress" class="progress hidden"><div></div></div>
+          <ul id="attachment-list"></ul>
+        </div>
+
+        <div class="form-error" id="task-error"></div>
+        <footer class="modal-foot">
+          <button type="button" class="btn danger ghost hidden" id="delete-task">Hapus tugas</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn ghost" data-close>Batal</button>
+          <button type="submit" class="btn primary" id="save-task">Simpan</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL KATEGORI ================= -->
+  <div id="category-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box narrow">
+      <header class="modal-head"><h2 id="cat-modal-title">Kategori baru</h2><button class="icon-btn" data-close>✕</button></header>
+      <form id="category-form" novalidate>
+        <label class="field">Nama <input name="name" maxlength="50" /><small class="err" data-err="name"></small></label>
+        <label class="field">Warna <input name="color" type="color" value="#4f46e5" /></label>
+        <div class="form-error" id="category-error"></div>
+        <footer class="modal-foot">
+          <button type="button" class="btn danger ghost hidden" id="delete-category">Hapus</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn ghost" data-close>Batal</button>
+          <button type="submit" class="btn primary">Simpan</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/js/app.js"></script>
+</body>
+</html>
