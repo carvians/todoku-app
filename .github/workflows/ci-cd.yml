@@ -170,13 +170,13 @@ jobs:
         run: docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' | grep todoku
 
       - name: Scan kerentanan image API (Trivy)
-        uses: aquasecurity/trivy-action@v0.28.0
-        with:
-          image-ref: ${{ env.API_IMAGE }}:${{ env.TAG }}
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'          # hanya laporan, tidak menggagalkan pipeline
-          format: table
+        # Dijalankan langsung lewat container Trivy resmi agar tidak bergantung pada action pihak ketiga
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.58.1 image \
+            --severity CRITICAL,HIGH --ignore-unfixed --exit-code 0 \
+            "$API_IMAGE:$TAG"
 
       - name: Login ke GitHub Container Registry
         if: github.event_name != 'pull_request'
