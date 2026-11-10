@@ -170,7 +170,7 @@ jobs:
         run: docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' | grep todoku
 
       - name: Scan kerentanan image API (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: ${{ env.API_IMAGE }}:${{ env.TAG }}
           severity: CRITICAL,HIGH
